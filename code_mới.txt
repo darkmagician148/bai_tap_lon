@@ -1,0 +1,71 @@
+#include <LabC.h>
+#include<TimerOne.h>
+#include "MQ135.h"
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <DHT.h>
+LiquidCrystal_I2C lcd(0x27,16,4);
+#define PIN_MQ135 A0   
+#define TIMER_US 5000
+MQ135 mq135_sensor = MQ135(PIN_MQ135);   //Khai báo đối tượng thư viện
+const int DHTPIN = 2;
+const int DHTTYPE = DHT11;
+DHT dht(DHTPIN, DHTTYPE);
+byte degree[8] = {
+ 0B01110,
+ 0B01010,
+ 0B01110,
+ 0B00000,
+ 0B00000,
+ 0B00000,
+ 0B00000,
+ 0B00000
+};
+void Delay()
+{
+}
+void Tre ( int n)
+{
+  for(int i;i<n;i++){
+    Delay();
+  }
+}
+void setup() {
+ Serial.begin(9600);
+ Timer1.initialize(TIMER_US);
+ Timer1.attachInterrupt(Delay);
+ lcd.init(); // hàm khỏi tạo lcd
+ lcd.backlight();// bật đèn nền lcd
+ lcd.setCursor (0,0);
+ lcd.print("Nhiet do: ");//
+ lcd.setCursor(0,1);
+ lcd.print("Do am: ");
+ lcd.setCursor (0,3);
+ lcd.print("PPM: ");
+ lcd.createChar(1, degree);
+ dht.begin(); 
+}
+void loop() {
+  float h = dht.readHumidity();
+  float ppm = mq135_sensor.getPPM();
+ float t = dht.readTemperature();
+ if (isnan(t) || isnan(h)) { // Kiểm tra xem thử việc đọc giá trị có bị thất bại hay không. hàm isnan 
+
+ }
+ else {
+ lcd.setCursor(10,0);
+ lcd.print(round(t));
+ lcd.print(" ");
+ lcd.write(1);
+ lcd.print("C");
+ lcd.setCursor(10,1);
+ lcd.print(round(h));
+ lcd.print(" %"); 
+ }
+
+ lcd.setCursor (5,3);
+ lcd.print(round(ppm));
+ lcd.print("PPM");
+ Tre(200);
+ 
+}
